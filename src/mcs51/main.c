@@ -316,8 +316,9 @@ _mcs51_finaliseOptions (void)
 static void
 _mcs51_setDefaultOptions (void)
 {
-  options.data_loc = 0x0001; /* We can't use the byte at address zero in C, since NULL pointers have special meaning */
-  options.code_loc = 0x8;
+  options.data_loc = 0; /* We can't use the byte at address zero in C, since NULL pointers have special meaning */
+  options.code_loc = 0;
+  options.stack_loc = -1;
   options.out_fmt = 'i';        /* Default output format is ihx */
 }
 

@@ -2525,9 +2525,29 @@ dwTagFromType (sym_link * type, dwtag * parent)
                   dwAddTagChild (dwRootTag, tp);
                   break;
 
-                case V_CHAR:
-                case V_BIT:
                 case V_SBIT:
+                  tp = dwNewTag (DW_TAG_base_type);
+                  dwAddTagAttr (tp, dwNewAttrConst (DW_AT_encoding,
+                                                    DW_ATE_unsigned_char));
+                  dwAddTagAttr (tp, dwNewAttrString (DW_AT_name, "_sbit"));
+                  dwAddTagAttr (tp, dwNewAttrConst (DW_AT_byte_size,
+                                                    getSize (type)));
+                  dwAddTagChild (dwRootTag, tp);
+                  break;
+               
+                case V_BIT:
+                  tp = dwNewTag (DW_TAG_base_type);
+                  dwAddTagAttr (tp, dwNewAttrConst (DW_AT_encoding,
+                                                    DW_ATE_unsigned_char));
+                  dwAddTagAttr (tp, dwNewAttrString (DW_AT_name, "_bit"));
+                  dwAddTagAttr (tp, dwNewAttrConst (DW_AT_byte_size,
+                                                    getSize (type)));
+                  dwAddTagChild (dwRootTag, tp);
+                  break;
+
+                case V_CHAR:
+//                case V_BIT:
+//                case V_SBIT:
                   tp = dwNewTag (DW_TAG_base_type);
                   if (SPEC_USIGN (type))
                     {

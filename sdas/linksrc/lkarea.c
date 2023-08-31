@@ -360,6 +360,9 @@ lnkarea(void)
         a_uint gs_size = 0;
         struct area *abs_ap = NULL;
         struct area *gs0_ap = NULL;
+        a_uint oseg_addr = 0;
+        a_uint oseg_size = 0;
+
         /* end sdld6800 specific */
         char temp[NCPS+2];
         struct sym *sp;
@@ -452,7 +455,7 @@ lnkarea(void)
                                         ap->a_addr = rloc[locIndex];
                         }
                         else if (ap->a_bset == 0) {
-                                if ((TARGET_IS_6808 || TARGET_IS_STM8) && ap->a_flag & A_NOLOAD) {
+                                if ((TARGET_IS_6808 || TARGET_IS_STM8 || TARGET_IS_8051) && ap->a_flag & A_NOLOAD) {
                                         locIndex = 2;
                                         ap->a_addr = 0;
                                 }
@@ -460,6 +463,9 @@ lnkarea(void)
                                         ap->a_addr = rloc[locIndex];
                                 }
                                 ap->a_bset = 1;
+                        }
+                        if (!strcmp(ap->a_id, "SSEG")) {
+                                ap->a_addr = oseg_addr + oseg_size;
                         }
                         lnksect(ap);
                         rloc[ locIndex ] = ap->a_addr + ap->a_size;
@@ -516,6 +522,10 @@ lnkarea(void)
                                         else break;
                                 }
                         }
+                }
+                if (!strcmp(ap->a_id, "OSEG")) {
+                        oseg_addr = ap->a_addr;
+                        oseg_size = ap->a_size;
                 }
                 ap = ap->a_ap;
         }
@@ -892,7 +902,13 @@ VOID lnkarea2 (void)
                 {
                         if (ap->a_bset == 0)
                         {
+                            if ((TARGET_IS_8051) && ap->a_flag & A_NOLOAD) {
+                                    locIndex = 2;
+                                    ap->a_addr = 0;
+                            }
+                            else {
                                 ap->a_addr = rloc[locIndex];
+                            }
                                 ap->a_bset = 1;
                         }
 
@@ -932,14 +948,14 @@ VOID lnkarea2 (void)
         }
 
         /*Compute the size of DSEG*/
-        if(dseg_ap!=NULL)
-        {
-                dseg_ap->a_addr=0;
-                dseg_ap->a_size=0;
-                for(j=0; j<0x80; j++) if(idatamap[j]!=' ') dseg_ap->a_size++;
-        }
-        if(sp_dseg_s!=NULL) sp_dseg_s->s_addr=0;
-        if(sp_dseg_l!=NULL) sp_dseg_l->s_addr=dseg_ap->a_size;
+        //if(dseg_ap!=NULL)
+        //{
+        //        dseg_ap->a_addr=0;
+        //        dseg_ap->a_size=0;
+        //        for(j=0; j<0x80; j++) if(idatamap[j]!=' ') dseg_ap->a_size++;
+        //}
+        //if(sp_dseg_s!=NULL) sp_dseg_s->s_addr=0;
+        //if(sp_dseg_l!=NULL) sp_dseg_l->s_addr=dseg_ap->a_size;
 }
 
 a_uint lnksect2 (struct area *tap, int locIndex)
@@ -1270,6 +1286,8 @@ a_uint lnksect2 (struct area *tap, int locIndex)
                                         {
                                                 addr = find_empty_space(addr, taxp->a_size, tap->a_id, xdatamap, sizeof (xdatamap));
                                                 allocate_space(addr, taxp->a_size, tap->a_id, xdatamap, sizeof (xdatamap));
+                                                if (strncmp(tap->a_id, ".debug", 6) == 0)
+                                                        addr = 0;
                                         }
                                         taxp->a_addr = addr;
                                         addr += taxp->a_size;
