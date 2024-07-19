@@ -316,9 +316,7 @@ _mcs51_finaliseOptions (void)
 static void
 _mcs51_setDefaultOptions (void)
 {
-  options.data_loc = 0; /* We can't use the byte at address zero in C, since NULL pointers have special meaning */
-  options.code_loc = 0;
-  options.stack_loc = -1;
+  options.idata_loc = 0x80;
   options.out_fmt = 'i';        /* Default output format is ihx */
 }
 
@@ -1051,7 +1049,7 @@ PORT mcs51_port =
   hasExtBitOp,                  /* hasExtBitOp */
   oclsExpense,                  /* oclsExpense */
   FALSE,                        /* use_dw_for_init */
-  FALSE,                         /* little_endian */
+  FALSE,                        /* big_endian */
   0,                            /* leave lt */
   0,                            /* leave gt */
   1,                            /* transform <= to ! > */

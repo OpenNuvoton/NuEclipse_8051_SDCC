@@ -690,7 +690,7 @@ printChar16 (struct dbuf_s *oBuf, const TYPE_TARGET_UINT *s, int plen)
           dbuf_tprintf (oBuf, "\t!db !constbyte\n", (*s >> 0) & 0xff);
           dbuf_tprintf (oBuf, "\t!db !constbyte\n", (*s >> 8) & 0xff);
         }
-      else if (port->little_endian)
+      else if (TRUE)
         dbuf_printf (oBuf, "\t.byte %d,%d\n", (*s >> 0) & 0xff, (*s >> 8) & 0xff);
       else
         dbuf_printf (oBuf, "\t.byte %d,%d\n", (*s >> 8) & 0xff, (*s >> 0) & 0xff);
@@ -722,7 +722,7 @@ printChar32 (struct dbuf_s *oBuf, const TYPE_TARGET_ULONG *s, int plen)
           dbuf_tprintf (oBuf, "\t!db !constbyte\n", (*s >> 16) & 0xff);
           dbuf_tprintf (oBuf, "\t!db !constbyte\n", (*s >> 24) & 0xff);
         }
-      else if (port->little_endian)
+      else if (TRUE)
         dbuf_printf (oBuf, "\t.byte %d,%d,%d,%d\n", (*s >> 0) & 0xff, (*s >> 8) & 0xff, (*s >> 16) & 0xff, (*s >> 24) & 0xff);
       else
         dbuf_printf (oBuf, "\t.byte %d,%d,%d,%d\n", (*s >> 24) & 0xff, (*s >> 16) & 0xff, (*s >> 8) & 0xff,(*s >> 0) & 0xff);
@@ -784,7 +784,7 @@ static void printIvalVal(struct dbuf_s *oBuf, value *val, int size, bool newline
   for (int i = 0; i < size; i++)
     {
       const char *inst;
-      const char *byte = aopLiteral (val, port->little_endian ? i : size - 1 - i);
+      const char *byte = aopLiteral (val, TRUE ? i : size - 1 - i);
       if (use_ret)
         inst = i != size - 1 ? "\tret %s\n" : "\tret %s";
       else
@@ -805,21 +805,21 @@ _printPointerType (struct dbuf_s *oBuf, const char *name, int size)
 
   if (size == 4)
     {
-      if (port->little_endian)
+      if (TRUE)
         dbuf_printf (oBuf, "\t.byte %s, (%s >> 8), (%s >> 16), (%s >> 24)", name, name, name, name);
       else
         dbuf_printf (oBuf, "\t.byte (%s >> 24), (%s >> 16), (%s >> 8), %s", name, name, name, name);
     }
   else if (size == 3)
     {
-      if (port->little_endian)
+      if (TRUE)
         dbuf_printf (oBuf, "\t.byte %s, (%s >> 8), (%s >> 16)", name, name, name);
       else
         dbuf_printf (oBuf, "\t.byte (%s >> 16), (%s >> 8), %s", name, name, name);
     }
   else
     {
-      if (port->little_endian)
+      if (TRUE)
         dbuf_printf (oBuf, "\t.byte %s, (%s >> 8)", name, name);
       else
         dbuf_printf (oBuf, "\t.byte (%s >> 8), %s", name, name);
@@ -873,7 +873,7 @@ printIvalType (symbol * sym, sym_link * type, initList * ilist, struct dbuf_s *o
     {
       if (!!(val = initPointer (ilist, type, 0)))
         {
-          int i, size = getSize (type), le = port->little_endian, top = (options.model == MODEL_FLAT24) ? 3 : 2;;
+          int i, size = getSize (type), le = TRUE, top = (options.model == MODEL_FLAT24) ? 3 : 2;;
           dbuf_printf (oBuf, "\t.byte ");
           for (i = (le ? 0 : size - 1); le ? (i < size) : (i > -1); i += (le ? 1 : -1))
             {
@@ -1574,7 +1574,7 @@ printIvalCharPtr (symbol * sym, sym_link * type, value * val, struct dbuf_s *oBu
             }
           else if (port->use_dw_for_init)
             dbuf_tprintf (oBuf, "\t!dws\n", aopLiteralLong (val, 0, size));
-          else if (port->little_endian)
+          else if (TRUE)
             dbuf_tprintf (oBuf, "\t.byte %s,%s\n", aopLiteral (val, 0), aopLiteral (val, 1));
           else
             dbuf_tprintf (oBuf, "\t.byte %s,%s\n", aopLiteral (val, 1), aopLiteral (val, 0));
@@ -1587,14 +1587,14 @@ printIvalCharPtr (symbol * sym, sym_link * type, value * val, struct dbuf_s *oBu
                   // non-zero mcs51 generic pointer
                   werrorfl (sym->fileDef, sym->lineDef, W_LITERAL_GENERIC);
                 }
-              if (port->little_endian)
+              if (TRUE)
                 dbuf_printf (oBuf, "\t.byte %s,%s,%s\n", aopLiteral (val, 0), aopLiteral (val, 1), aopLiteralGptr (sym->name, val));
               else
                 dbuf_printf (oBuf, "\t.byte %s,%s,%s\n", aopLiteralGptr (sym->name, val), aopLiteral (val, 1), aopLiteral (val, 0));
             }
           else
             {
-              if (port->little_endian)
+              if (TRUE)
                 dbuf_printf (oBuf, "\t.byte %s,%s,%s\n", aopLiteral (val, 0), aopLiteral (val, 1), aopLiteral (val, 2));
               else
                 dbuf_printf (oBuf, "\t.byte %s,%s,%s\n", aopLiteral (val, 2), aopLiteral (val, 1), aopLiteral (val, 0));
@@ -1608,7 +1608,7 @@ printIvalCharPtr (symbol * sym, sym_link * type, value * val, struct dbuf_s *oBu
                   // non-zero ds390 generic pointer
                   werrorfl (sym->fileDef, sym->lineDef, W_LITERAL_GENERIC);
                 }
-              if (port->little_endian)
+              if (TRUE)
                 {
                   dbuf_printf (oBuf, "\t.byte %s,%s,%s", aopLiteral (val, 0), aopLiteral (val, 1), aopLiteral (val, 2));
                   if (IS_PTR (val->type) && !IS_GENPTR (val->type))
@@ -1627,7 +1627,7 @@ printIvalCharPtr (symbol * sym, sym_link * type, value * val, struct dbuf_s *oBu
             }
           else
             {
-              if (port->little_endian)
+              if (TRUE)
                 {
                   dbuf_printf (oBuf, "\t.byte %s,%s,%s,%s\n",
                                aopLiteral (val, 0), aopLiteral (val, 1), aopLiteral (val, 2), aopLiteral (val, 3));
@@ -1701,7 +1701,7 @@ printIvalPtr (symbol *sym, sym_link *type, initList *ilist, struct dbuf_s *oBuf)
         case 2:
           if (port->use_dw_for_init)
             dbuf_tprintf (oBuf, "\t!dws\n", aopLiteralLong (val, 0, 2));
-          else if (port->little_endian)
+          else if (TRUE)
             {
               if (use_ret)
                 dbuf_tprintf (oBuf, "\tret %s\n\tret %s\n", aopLiteral (val, 0), aopLiteral (val, 1));
@@ -1713,7 +1713,7 @@ printIvalPtr (symbol *sym, sym_link *type, initList *ilist, struct dbuf_s *oBuf)
           break;
         case 3:
           dbuf_printf (oBuf, "; generic printIvalPtr\n");
-          if (port->little_endian)
+          if (TRUE)
             dbuf_printf (oBuf, "\t.byte %s,%s", aopLiteral (val, 0), aopLiteral (val, 1));
           else
             dbuf_printf (oBuf, "\t.byte %s,%s", aopLiteral (val, 1), aopLiteral (val, 0));
